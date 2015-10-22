@@ -20,6 +20,19 @@
 //    ui->windSpeedLabel->setText(str);
 //}
 
+void MainWindow::computeBaroCorrection(double newAirTemp)
+{
+//    baro correction: babinet's formula (alpha=16000 + 64 Tc
+//   P=P0[(alpha-Hm)/(alpha+Hm)]
+//   where Tc is temp in C and Hm is height in meters
+  double alpha, baroCorrection, mastHeight=20;
+  //alpha =  16000 + ( 64 * newAirTemp);
+  alpha =  16000 + ( 64 * airTempC->value());
+  baroCorrection = (alpha + mastHeight) / (alpha - mastHeight);
+  baroPressB->setScalarVal(baroCorrection);
+  ui->baroCorrectionFactorVal->setText(QString::number(baroCorrection,'f',6));
+}
+
 void MainWindow::setPositionAlarm(bool newState)
 {
     positionAlarmSet = newState;
@@ -44,6 +57,7 @@ void MainWindow::computeDistanceStr(QString newVal)
       if ( positionAlarmSet ) {
 //          qDebug() << "Check alarm state";
           if ( positionOffsetFeet >= QString(ui->lineEditPositionHigh->text()).toDouble() ) {
+               ui->radioButtonPositionAlarm->setChecked(true);
                qDebug() << "Sound position high alarm";
 #ifdef linux
                QProcess *alarmSound = new QProcess(this);
@@ -55,6 +69,7 @@ void MainWindow::computeDistanceStr(QString newVal)
 #endif
           }
           if ( positionOffsetFeet < QString(ui->lineEditPositionLow->text()).toDouble() ) {
+               ui->radioButtonPositionAlarm->setChecked(true);
                qDebug() << "Sound position low alarm";
 #ifdef linux
                QProcess *alarmSound = new QProcess(this);
@@ -68,6 +83,12 @@ void MainWindow::computeDistanceStr(QString newVal)
       }
     }
 }
+void MainWindow::computeInitialDistance()
+{
+      positionMaxOffsetFeet=0;
+      ui->positionMaxDistanceF->setText(QString::number(positionMaxOffsetFeet,'f',1));
+      this->computeDistance();
+}
 
 void MainWindow::computeDistance()
 {
@@ -79,6 +100,7 @@ void MainWindow::computeDistance()
     double posLatM=positionLatM->value();
     double posLonD=positionLonD->value();
     double posLonM=positionLonM->value();
+    ui->radioButtonPositionUpdate->toggle();
     //qDebug() << "latD offset: " << distanceLatD->offsetValue();
     //qDebug() << "latM offset: " << distanceLatM->offsetValue();
     //qDebug() << "lonD offset: " << distanceLonD->offsetValue();
@@ -441,7 +463,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QwtSimpleCompassRose *roseCmg = new QwtSimpleCompassRose(12,1);
     ui->CompassCmgT->setRose(roseCmg);
     //QObject::connect(boatHdgM,SIGNAL(valueChanged(double)),ui->CompassMagHdg,SLOT()
-    QObject::connect(boatCmgT,SIGNAL(valueChanged(double)),ui->CompassCmgT,SLOT(setValue(double)));
+    QObject::connect(boatCmgM,SIGNAL(valueChanged(double)),ui->CompassCmgT,SLOT(setValue(double)));
 
     //Boat Mag Hdg
     boatMagHdgNeedle=new QwtDialSimpleNeedle(QwtDialSimpleNeedle::Arrow,true,Qt::red,Qt::blue) ;
@@ -506,6 +528,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(airTempF,SIGNAL(stringMinChanged(QString)),ui->airTempMinData,SLOT(setText(QString)));
     QObject::connect(airTempF,SIGNAL(stringMaxChanged(QString)),ui->airTempMaxData,SLOT(setText(QString)));
     QObject::connect(ui->pushButtonAirT,SIGNAL(clicked()),airTempF,SLOT(resetVal()));
+    QObject::connect(ui->pushButtonAirTempAlarm,SIGNAL(clicked(bool)),airTempF,SLOT(setAlarm(bool)));
+    QObject::connect(ui->lineEditAirTempLow,SIGNAL(textEdited(QString)),airTempF,SLOT(setAlarmLow(QString)));
+    QObject::connect(ui->lineEditAirTempHigh,SIGNAL(textEdited(QString)),airTempF,SLOT(setAlarmHigh(QString)));
+    QObject::connect(airTempF,SIGNAL(alarmHighChanged(QString)),ui->lineEditAirTempHigh,SLOT(setText(QString)));
+    QObject::connect(airTempF,SIGNAL(alarmLowChanged(QString)),ui->lineEditAirTempLow,SLOT(setText(QString)));
+    QObject::connect(airTempF,SIGNAL(alarmTriggered(bool)),ui->radioButtonAirTempAlarm,SLOT(setChecked(bool)));
+    QObject::connect(airTempF,SIGNAL(valueChanged(double)),this,SLOT(computeBaroCorrection(double)));
 
     QObject::connect(waterTempF,SIGNAL(stringChanged(QString)),ui->waterTempData,SLOT(setText(QString)));
     QObject::connect(waterTempF,SIGNAL(stringMinChanged(QString)),ui->waterTempMinData,SLOT(setText(QString)));
@@ -516,6 +545,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(waterDepthF,SIGNAL(stringMinChanged(QString)),ui->waterDepthMinData,SLOT(setText(QString)));
     QObject::connect(waterDepthF,SIGNAL(stringMaxChanged(QString)),ui->waterDepthMaxData,SLOT(setText(QString)));
     QObject::connect(ui->pushButtonWaterD,SIGNAL(clicked()),waterDepthF,SLOT(resetVal()));
+    QObject::connect(ui->pushButtonWaterDepthAlarm,SIGNAL(clicked(bool)),waterDepthF,SLOT(setAlarm(bool)));
+    QObject::connect(ui->lineEditWaterDepthLow,SIGNAL(textEdited(QString)),waterDepthF,SLOT(setAlarmLow(QString)));
+    QObject::connect(ui->lineEditWaterDepthHigh,SIGNAL(textEdited(QString)),waterDepthF,SLOT(setAlarmHigh(QString)));
+    QObject::connect(waterDepthF,SIGNAL(alarmHighChanged(QString)),ui->lineEditWaterDepthHigh,SLOT(setText(QString)));
+    QObject::connect(waterDepthF,SIGNAL(alarmLowChanged(QString)),ui->lineEditWaterDepthLow,SLOT(setText(QString)));
+    QObject::connect(waterDepthF,SIGNAL(alarmTriggered(bool)),ui->radioButtonWaterDepthAlarm,SLOT(setChecked(bool)));
 
     QObject::connect(dpTempF,SIGNAL(stringChanged(QString)),ui->dpTempData,SLOT(setText(QString)));
     QObject::connect(dpTempF,SIGNAL(stringMinChanged(QString)),ui->dpTempMinData,SLOT(setText(QString)));
@@ -533,6 +568,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(baroPressB,SIGNAL(stringMinChanged(QString)),ui->baroPressMinData,SLOT(setText(QString)));
     QObject::connect(baroPressB,SIGNAL(stringMaxChanged(QString)),ui->baroPressMaxData,SLOT(setText(QString)));
     QObject::connect(ui->pushButtonBaro,SIGNAL(clicked()),baroPressB,SLOT(resetVal()));
+    QObject::connect(ui->pushButtonBaroAlarm,SIGNAL(clicked(bool)),baroPressB,SLOT(setAlarm(bool)));
+    QObject::connect(ui->lineEditBaroLow,SIGNAL(textEdited(QString)),baroPressB,SLOT(setAlarmLow(QString)));
+    QObject::connect(ui->lineEditBaroHigh,SIGNAL(textEdited(QString)),baroPressB,SLOT(setAlarmHigh(QString)));
+    QObject::connect(baroPressB,SIGNAL(alarmHighChanged(QString)),ui->lineEditBaroHigh,SLOT(setText(QString)));
+    QObject::connect(baroPressB,SIGNAL(alarmLowChanged(QString)),ui->lineEditBaroLow,SLOT(setText(QString)));
+    QObject::connect(baroPressB,SIGNAL(alarmTriggered(bool)),ui->radioButtonBaroAlarm,SLOT(setChecked(bool)));
 
     QObject::connect(boatVmgK,SIGNAL(stringChanged(QString)),ui->boatVmgKData,SLOT(setText(QString)));
     QObject::connect(boatVmgK,SIGNAL(stringMinChanged(QString)),ui->boatVmgKMinData,SLOT(setText(QString)));
@@ -581,16 +622,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QObject::connect(positionRefLatD,SIGNAL(stringChanged(QString)),ui->lineEditRefPosLatD,SLOT(setText(QString)));
     QObject::connect(ui->lineEditRefPosLatD,SIGNAL(textEdited(QString)),distanceLatD,SLOT(setOffsetNegString(QString)));
-    QObject::connect(ui->lineEditRefPosLatD,SIGNAL(editingFinished()),this,SLOT(computeDistance()));
+    QObject::connect(ui->lineEditRefPosLatD,SIGNAL(editingFinished()),this,SLOT(computeInitialDistance()));
     QObject::connect(positionRefLatM,SIGNAL(stringChanged(QString)),ui->lineEditRefPosLatM,SLOT(setText(QString)));
     QObject::connect(ui->lineEditRefPosLatM,SIGNAL(textEdited(QString)),distanceLatM,SLOT(setOffsetNegString(QString)));
-    QObject::connect(ui->lineEditRefPosLatM,SIGNAL(editingFinished()),this,SLOT(computeDistance()));
+    QObject::connect(ui->lineEditRefPosLatM,SIGNAL(editingFinished()),this,SLOT(computeInitialDistance()));
     QObject::connect(positionRefLonD,SIGNAL(stringChanged(QString)),ui->lineEditRefPosLonD,SLOT(setText(QString)));
     QObject::connect(ui->lineEditRefPosLonD,SIGNAL(textEdited(QString)),distanceLonD,SLOT(setOffsetNegString(QString)));
-    QObject::connect(ui->lineEditRefPosLonD,SIGNAL(editingFinished()),this,SLOT(computeDistance()));
+    QObject::connect(ui->lineEditRefPosLonD,SIGNAL(editingFinished()),this,SLOT(computeInitialDistance()));
     QObject::connect(positionRefLonM,SIGNAL(stringChanged(QString)),ui->lineEditRefPosLonM,SLOT(setText(QString)));
     QObject::connect(ui->lineEditRefPosLonM,SIGNAL(textEdited(QString)),distanceLonM,SLOT(setOffsetNegString(QString)));
-    QObject::connect(ui->lineEditRefPosLonM,SIGNAL(editingFinished()),this,SLOT(computeDistance()));
+    QObject::connect(ui->lineEditRefPosLonM,SIGNAL(editingFinished()),this,SLOT(computeInitialDistance()));
 
     QObject::connect(ui->pushButtonSetRefPosHere,SIGNAL(clicked()),this,SLOT(setRefPosHere()));
 

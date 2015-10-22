@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'hostname.ui'
 **
-** Created: Tue Apr 1 21:52:46 2014
+** Created: Tue Oct 7 20:15:24 2014
 **      by: Qt User Interface Compiler version 4.8.2
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!

@@ -118,7 +118,7 @@ Hostname::Hostname(QWidget *parent, QString ihost, QString iport) :
 //    ui(new Ui::Hostname)
 {
   //  ui->
-    defaultport="27644";
+    defaultport="23000";
     host=ihost;
     port=iport;
     setupUi(this);

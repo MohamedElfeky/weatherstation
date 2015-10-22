@@ -60,6 +60,7 @@ int WeatherData::setValue(double newValue) {//should we always emit if not initi
     QString strval;
     double limitNewValue;
     double temp_val;
+    emit newValueReceived();
     carry=0;
     limitNewValue = scalarVal * ( newValue + offsetVal );
 #ifdef linux

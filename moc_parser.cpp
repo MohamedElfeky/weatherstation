@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'parser.h'
 **
-** Created: Wed May 14 13:12:34 2014
+** Created: Wed Oct 8 12:26:35 2014
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -31,13 +31,13 @@ static const uint qt_meta_data_Parser[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-       8,    7,    7,    7, 0x08,
+       7,   18,   18,   18, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_Parser[] = {
-    "Parser\0\0readPort()\0"
+    "Parser\0readPort()\0\0"
 };
 
 void Parser::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)

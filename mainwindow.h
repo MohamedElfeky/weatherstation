@@ -87,6 +87,8 @@ private slots:
 //    void sessionOpened();
 public slots:
  //   void setBaro(const QString &str);
+    void computeBaroCorrection(double newAirTemp);
+    void computeInitialDistance();
     void computeDistance();
     void computeDistanceStr(QString newVal);
     void setPositionAlarm(bool newState);

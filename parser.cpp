@@ -11,10 +11,13 @@
 //}
 //int ctr=0;
 //void Parser::readPort(WeatherData *baroPressB)
+int gpsposcounter=0, gpsposlimit=4;
 void Parser::readPort()
 {
 //    ctr++;
+    int gpsposindex, listindex=0;
     double tempVal;
+    gpsposcounter++;
     QString fullData;
     QString dataLine;
     //char *data;
@@ -27,7 +30,18 @@ void Parser::readPort()
 //    tcpSocket->flush();
 //    qDebug() << ctr << ": " << fullData;
     QStringList fullList = fullData.split(QRegExp("\n"));
-    dataLine = fullList.at(0);
+    if (( gpsposcounter > gpsposlimit )  ) {//add condition for pos alarm set
+       gpsposindex=fullList.indexOf(QRegExp("\\$GPGGA\.*")); // back slash around text to make qstring??
+       if ( gpsposindex >= 0 ) {
+           listindex = gpsposindex;
+//           if ( gpsposindex >= 0 ) qDebug() << "Index is:" << listindex << " Gps counter is:" << gpsposcounter << " Gps pos at:" << gpsposindex << " Value is:" << fullList.at(gpsposindex);
+       }
+       else {
+           listindex = 0;
+//           qDebug() << "No GPS pos is available: Using index:" << listindex << " Gps counter is:" << gpsposcounter;
+       }
+    }
+    dataLine = fullList.at(listindex);
     QStringList sList = dataLine.split(QRegExp("[$,*]"), QString::SkipEmptyParts);
 //    qDebug() << sList;
   //    qDebug() << sList;
@@ -46,7 +60,7 @@ void Parser::readPort()
 //        qDebug() << "general stuff:" << sList.size();
         if ( sList.size() == 19 ){
           baroPressB->setValue(1000 * QString(sList.at(3)).toDouble() );
-//          airTempC->setValue( QString(sList.at(5)).toDouble() );
+          airTempC->setValue( QString(sList.at(5)).toDouble() );
           airTempF->setValue( (9 * QString(sList.at(5)).toDouble() / 5 ) + 32 );
 //          dpTempC->setValue( QString(sList.at(8)).toDouble() );
           dpTempF->setValue( ( 9 * QString(sList.at(8)).toDouble() / 5 ) + 32 );
@@ -112,6 +126,7 @@ void Parser::readPort()
           }
           break;
       case 8: //"$GPGGA"
+          gpsposcounter = 0;
 //          qDebug() << "GPS Pos:" << sList.size();
 //          qDebug() << sList;
           if ( sList.size() == 12 ){

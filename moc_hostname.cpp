@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'hostname.h'
 **
-** Created: Tue Apr 1 21:52:50 2014
+** Created: Tue Oct 7 20:22:25 2014
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.2)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -31,18 +31,18 @@ static const uint qt_meta_data_Hostname[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      10,    9,    9,    9, 0x08,
-      27,    9,    9,    9, 0x08,
-      44,    9,    9,    9, 0x08,
-      67,   55,    9,    9, 0x08,
+       9,   26,   26,   26, 0x08,
+      27,   26,   26,   26, 0x08,
+      44,   26,   26,   26, 0x08,
+      55,   98,   26,   26, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_Hostname[] = {
-    "Hostname\0\0setDefaultPort()\0requestNewData()\0"
-    "readPort()\0socketError\0"
-    "displayError(QAbstractSocket::SocketError)\0"
+    "Hostname\0setDefaultPort()\0\0requestNewData()\0"
+    "readPort()\0displayError(QAbstractSocket::SocketError)\0"
+    "socketError\0"
 };
 
 void Hostname::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)

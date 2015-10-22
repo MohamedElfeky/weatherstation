@@ -26,6 +26,7 @@ public:
     double defaultValue() const { return defaultVal; }
     double reset(); // const { return m_value; }
     bool checkInitialized() const { return isInitialized; }
+    bool alarmState() const { return alarmOn; }
     void setPrecision(int newValue);
     void setLeftPad(int newValue);
     void setAvgNumVals(int newValue);
@@ -48,6 +49,7 @@ public slots:
 signals:
 //    void valueChanged(int newValue);
     void valueChanged(double newValue);
+    void newValueReceived();
     void stringChanged(QString newStr);
     void maxChanged(double newMax);
     void stringMaxChanged(QString newStr);
